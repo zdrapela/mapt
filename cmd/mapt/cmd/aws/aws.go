@@ -25,6 +25,10 @@ func GetCmd() *cobra.Command {
 			return nil
 		},
 	}
+	
+	flagSet := pflag.NewFlagSet(cmd, pflag.ExitOnError)
+	params.AddCommonFlags(flagSet)
+	c.PersistentFlags().AddFlagSet(flagSet)
 
 	c.AddCommand(
 		hosts.GetMacCmd(),
