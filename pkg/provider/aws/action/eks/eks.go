@@ -10,11 +10,11 @@ import (
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/iam"
 	"github.com/pulumi/pulumi/sdk/v3/go/auto"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
+	"github.com/redhat-developer/mapt/pkg/manager"
 	maptContext "github.com/redhat-developer/mapt/pkg/manager/context"
 	"github.com/redhat-developer/mapt/pkg/provider/aws"
-	"github.com/redhat-developer/mapt/pkg/manager"
-	"github.com/redhat-developer/mapt/pkg/util/logging"
 	"github.com/redhat-developer/mapt/pkg/provider/util/output"
+	"github.com/redhat-developer/mapt/pkg/util/logging"
 )
 
 type EKSRequest struct {
@@ -34,7 +34,7 @@ func Create(ctx *maptContext.ContextArgs, r *EKSRequest) (err error) {
 		return err
 	}
 	cs := manager.Stack{
-		StackName:           maptContext.StackNameByProject(stackEKS),
+		StackName:           maptContext.StackNameByProject(stackName),
 		ProjectName:         maptContext.ProjectName(),
 		BackedURL:           maptContext.BackedURL(),
 		ProviderCredentials: aws.DefaultCredentials,
@@ -46,14 +46,14 @@ func Create(ctx *maptContext.ContextArgs, r *EKSRequest) (err error) {
 
 func Destroy(ctx *maptContext.ContextArgs) error {
 	// Create mapt Context
-	logging.Debug("Destroy AKS")
+	logging.Debug("Destroy EKS")
 	if err := maptContext.Init(ctx, aws.Provider()); err != nil {
 		return err
 	}
 	return aws.DestroyStack(
 		aws.DestroyStackRequest{
 			BackedURL: maptContext.BackedURL(),
-			Stackname: maptContext.StackNameByProject(stackEKS),
+			Stackname: stackName,
 	})
 }
 
@@ -243,7 +243,7 @@ func toPulumiStringArray(a []string) pulumi.StringArrayInput {
 }
 
 // MAPT AKS Kubeconfig
-// // Write exported values in context to files o a selected target folder
+// Write exported values in context to files o a selected target folder
 func (r *EKSRequest) manageResults(stackResult auto.UpResult) error {
 	return output.Write(stackResult, maptContext.GetResultsOutputPath(), map[string]string{
 		fmt.Sprintf("%s-%s", r.Prefix, outputKubeconfig): "kubeconfig",

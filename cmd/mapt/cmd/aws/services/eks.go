@@ -83,10 +83,12 @@ func getCreateEKS() *cobra.Command {
 		},
 	}
 	flagSet := pflag.NewFlagSet(params.CreateCmdName, pflag.ExitOnError)
-	params.AddCommonFlags(flagSet)
+	flagSet.StringP(params.ConnectionDetailsOutput, "", "", params.ConnectionDetailsOutputDesc)
+	flagSet.StringToStringP(params.Tags, "", nil, params.TagsDesc)
 	flagSet.StringP(awsparams.ParamLocation, "", awsparams.DefaultLocation, awsparams.ParamLocationDesc)
 	flagSet.StringP(awsparams.ParamVMSize, "", awsparams.DefaultVMSize, paramVMSizeDesc)
 	flagSet.StringP(paramVersion, "", defaultVersion, paramVersionDesc)
+	// flagSet.Bool(awsparams.ParamSpot, false, awsparams.ParamSpotDesc)
 	flagSet.Bool(paramOnlySystemPool, false, paramOnlySystemPoolDesc)
 	// flagSet.Bool(paramEnableAppRouting, false, paramEnableAppRoutingDesc)
 	// flagSet.StringP(awsparams.ParamSpotTolerance, "", awsparams.DefaultSpotTolerance, awsparams.ParamSpotToleranceDesc)
