@@ -7,6 +7,7 @@ import (
 
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/ec2"
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/eks"
+	// "github.com/pulumi/pulumi-eks/sdk/v3/go/eks" // This version allows to define Auto Mode
 	"github.com/pulumi/pulumi-aws/sdk/v6/go/aws/iam"
 	"github.com/pulumi/pulumi/sdk/v3/go/auto"
 	"github.com/pulumi/pulumi/sdk/v3/go/pulumi"
@@ -27,6 +28,8 @@ type EKSRequest struct {
 	// Spot              bool
 	// SpotTolerance     spotAzure.EvictionRate
 }
+
+const autoMode bool = true
 
 func Create(ctx *maptContext.ContextArgs, r *EKSRequest) (err error) {
 	logging.Debug("Creating EKS")
@@ -170,24 +173,43 @@ func (r *EKSRequest) deployer(ctx *pulumi.Context) error {
 			SubnetIds: toPulumiStringArray(subnet.Ids),
 		},
 		Version: pulumi.String(r.KubernetesVersion),
+		// Set the Auto mode
+		ComputeConfig: &eks.ClusterComputeConfigArgs{
+			Enabled: pulumi.Bool(autoMode),
+		},
+		KubernetesNetworkConfig: &eks.ClusterKubernetesNetworkConfigArgs{
+			ElasticLoadBalancing: &eks.ClusterKubernetesNetworkConfigElasticLoadBalancingArgs{
+				Enabled: pulumi.Bool(autoMode),
+			},
+		},
+		StorageConfig: &eks.ClusterStorageConfigArgs{
+			BlockStorage: &eks.ClusterStorageConfigBlockStorageArgs{
+				Enabled: pulumi.Bool(autoMode),
+			},
+		},
+		BootstrapSelfManagedAddons: pulumi.BoolPtr(!autoMode),
 	})
 	if err != nil {
 		return err
 	}
 
-	_, err = eks.NewNodeGroup(ctx, "node-group-2", &eks.NodeGroupArgs{
-		ClusterName:   eksCluster.Name,
-		NodeGroupName: pulumi.String("demo-eks-nodegroup-2"),
-		NodeRoleArn:   pulumi.StringInput(nodeGroupRole.Arn),
-		SubnetIds:     toPulumiStringArray(subnet.Ids),
-		ScalingConfig: &eks.NodeGroupScalingConfigArgs{
-			DesiredSize: pulumi.Int(2),
-			MaxSize:     pulumi.Int(5),
-			MinSize:     pulumi.Int(0),
-		},
-	})
-	if err != nil {
-		return err
+	if(autoMode==false) {
+		_, err = eks.NewNodeGroup(ctx, "node-group-2", &eks.NodeGroupArgs{
+			ClusterName:   eksCluster.Name,
+			NodeGroupName: pulumi.String("demo-eks-nodegroup-2"),
+			NodeRoleArn:   pulumi.StringInput(nodeGroupRole.Arn),
+			SubnetIds:     toPulumiStringArray(subnet.Ids),
+			InstanceTypes: pulumi.StringArray{pulumi.String(r.VMSize)},
+			ScalingConfig: &eks.NodeGroupScalingConfigArgs{
+				// TODO: Hardcoded, but should be configurable
+				DesiredSize: pulumi.Int(2),
+				MaxSize:     pulumi.Int(5),
+				MinSize:     pulumi.Int(0),
+			},
+		})
+		if err != nil {
+			return err
+		}
 	}
 
 	kubeconfig := generateKubeconfig(eksCluster.Endpoint, eksCluster.CertificateAuthority.Data().Elem(), eksCluster.Name)
