@@ -17,16 +17,17 @@ const (
 
 	paramVersion              = "version"
 	paramVersionDesc          = "EKS K8s cluster version"
+	defaultParamVMSize		    = "t3.medium"
 	paramVMSizeDesc           = "VMSize to be used on the user pool. Typically this is used to provision spot node pools"
 	defaultVersion            = "1.31"
 	paramScalingDesiredSize   = "workers-desired"
-	paramScalingDesiredSizeDesc = "Scale the worker nodes to desired number. Default is 1"
+	paramScalingDesiredSizeDesc = "Worker nodes scaling desired size"
 	defaultScalingDesiredSize	 = "1"
 	paramScalingMaxSize        = "workers-max"
-	paramScalingMaxSizeDesc    = "Scale the worker nodes to maximum number. Default is 3"
+	paramScalingMaxSizeDesc    = "Worker nodes scaling maximum size"
 	defaultScalingMaxSize      = "3"
 	paramScalingMinSize        = "workers-min"
-	paramScalingMinSizeDesc    = "Scale the worker nodes to minimum number. Default is 1"
+	paramScalingMinSizeDesc    = "Worker nodes scaling minimum size"
 	defaultScalingMinSize      = "1"
 	// paramOnlySystemPool       = "only-system-pool"
 	// paramOnlySystemPoolDesc   = "if we do not need bunch of resources we can run only the systempool. More info https://learn.microsoft.com/es-es/azure/aks/use-system-pools?tabs=azure-cli#system-and-user-node-pools"
@@ -99,7 +100,7 @@ func getCreateEKS() *cobra.Command {
 	flagSet.StringP(params.ConnectionDetailsOutput, "", "", params.ConnectionDetailsOutputDesc)
 	flagSet.StringToStringP(params.Tags, "", nil, params.TagsDesc)
 	flagSet.StringP(awsparams.ParamLocation, "", awsparams.DefaultLocation, awsparams.ParamLocationDesc)
-	flagSet.StringP(awsparams.ParamVMSize, "", awsparams.DefaultVMSize, paramVMSizeDesc)
+	flagSet.StringP(awsparams.ParamVMSize, "", defaultParamVMSize, paramVMSizeDesc)
 	flagSet.StringP(paramVersion, "", defaultVersion, paramVersionDesc)
 	flagSet.StringP(paramScalingDesiredSize, "", defaultScalingDesiredSize, paramScalingDesiredSizeDesc)
 	flagSet.StringP(paramScalingMaxSize, "", defaultScalingMaxSize, paramScalingMaxSizeDesc)

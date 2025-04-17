@@ -182,6 +182,9 @@ func (r *EKSRequest) deployer(ctx *pulumi.Context) error {
 		NodeGroupName: pulumi.String("eks-nodegroup-0"),
 		NodeRoleArn:   pulumi.StringInput(nodeGroupRole.Arn),
 		SubnetIds:     toPulumiStringArray(subnet.Ids),
+		InstanceTypes: pulumi.StringArray{
+			pulumi.String(r.VMSize),
+		},
 		ScalingConfig: &eks.NodeGroupScalingConfigArgs{
 			DesiredSize: pulumi.Int(r.ScalingDesiredSize),
 			MaxSize:     pulumi.Int(r.ScalingMaxSize),
