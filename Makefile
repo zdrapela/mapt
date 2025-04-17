@@ -2,7 +2,7 @@ VERSION ?= 0.9.0-dev
 CONTAINER_MANAGER ?= podman
 
 # Image URL to use all building/pushing image targets
-IMG ?= localhost/mapt-test:v${VERSION}
+IMG ?= quay.io/redhat-developer/mapt:v${VERSION}
 TKN_IMG ?= quay.io/redhat-developer/mapt:v${VERSION}-tkn
 
 # Integrations
@@ -98,13 +98,13 @@ oci-build: clean oci-build-amd64 oci-build-arm64
 .PHONY: oci-build-amd64
 oci-build-amd64: clean
 	# Build the container image for amd64
-	${CONTAINER_MANAGER} build --platform linux/amd64 --tag $(IMG)-amd64 -f oci/Containerfile .
+	${CONTAINER_MANAGER} build --platform linux/amd64 --manifest $(IMG)-amd64 -f oci/Containerfile .
 
 # Build for arm64 architecture only
 .PHONY: oci-build-arm64
 oci-build-arm64: clean
 	# Build the container image for arm64
-	${CONTAINER_MANAGER} build --platform linux/arm64 --tag $(IMG)-arm64 -f oci/Containerfile .
+	${CONTAINER_MANAGER} build --platform linux/arm64 --manifest $(IMG)-arm64 -f oci/Containerfile .
 
 # Save images for amd64 architecture only
 .PHONY: oci-save-amd64
