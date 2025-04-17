@@ -21,8 +21,10 @@ type EKSRequest struct {
 	Prefix   string
 	Location string
 	VMSize   string
-	// "1.26.3"
 	KubernetesVersion string
+	ScalingDesiredSize int
+	ScalingMaxSize     int
+	ScalingMinSize     int
 	// OnlySystemPool    bool
 	// Spot              bool
 	// SpotTolerance     spotAzure.EvictionRate
@@ -175,15 +177,15 @@ func (r *EKSRequest) deployer(ctx *pulumi.Context) error {
 		return err
 	}
 
-	_, err = eks.NewNodeGroup(ctx, "node-group-2", &eks.NodeGroupArgs{
+	_, err = eks.NewNodeGroup(ctx, "node-group-0", &eks.NodeGroupArgs{
 		ClusterName:   eksCluster.Name,
-		NodeGroupName: pulumi.String("demo-eks-nodegroup-2"),
+		NodeGroupName: pulumi.String("eks-nodegroup-0"),
 		NodeRoleArn:   pulumi.StringInput(nodeGroupRole.Arn),
 		SubnetIds:     toPulumiStringArray(subnet.Ids),
 		ScalingConfig: &eks.NodeGroupScalingConfigArgs{
-			DesiredSize: pulumi.Int(2),
-			MaxSize:     pulumi.Int(5),
-			MinSize:     pulumi.Int(0),
+			DesiredSize: pulumi.Int(r.ScalingDesiredSize),
+			MaxSize:     pulumi.Int(r.ScalingMaxSize),
+			MinSize:     pulumi.Int(r.ScalingMinSize),
 		},
 	})
 	if err != nil {
@@ -192,7 +194,7 @@ func (r *EKSRequest) deployer(ctx *pulumi.Context) error {
 
 	kubeconfig := generateKubeconfig(eksCluster.Endpoint, eksCluster.CertificateAuthority.Data().Elem(), eksCluster.Name)
 
-	ctx.Export("kubeconfig", kubeconfig)
+	ctx.Export(fmt.Sprintf("%s-%s", r.Prefix, outputKubeconfig), kubeconfig)
 	return nil
 }
 
@@ -242,9 +244,10 @@ func toPulumiStringArray(a []string) pulumi.StringArrayInput {
 	return pulumi.StringArray(res)
 }
 
-// MAPT AKS Kubeconfig
+// TODO: Not working yet, no output file generated
 // Write exported values in context to files o a selected target folder
 func (r *EKSRequest) manageResults(stackResult auto.UpResult) error {
+
 	return output.Write(stackResult, maptContext.GetResultsOutputPath(), map[string]string{
 		fmt.Sprintf("%s-%s", r.Prefix, outputKubeconfig): "kubeconfig",
 	})

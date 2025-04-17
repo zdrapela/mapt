@@ -2,7 +2,6 @@ package eks
 
 const (
 	stackName        = "stackCreateEKS"
-	awsAKSID         = "aeks" // ?
 	outputKubeconfig = "eksKubeconfig"
-	systemPoolVMSize = "Standard_A2_v2"
+	systemPoolVMSize = "t3.medium"
 )
