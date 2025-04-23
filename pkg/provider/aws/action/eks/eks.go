@@ -25,6 +25,7 @@ type EKSRequest struct {
 	ScalingDesiredSize int
 	ScalingMaxSize     int
 	ScalingMinSize     int
+	Addons 	[]string
 	// OnlySystemPool    bool
 	// Spot              bool
 	// SpotTolerance     spotAzure.EvictionRate
@@ -175,6 +176,16 @@ func (r *EKSRequest) deployer(ctx *pulumi.Context) error {
 	})
 	if err != nil {
 		return err
+	}
+
+	for _, addon := range r.Addons {
+		_, err = eks.NewAddon(ctx, addon, &eks.AddonArgs{
+			ClusterName: eksCluster.Name,
+			AddonName:   pulumi.String(addon),
+		})
+		if err != nil {
+			return err
+		}
 	}
 
 	_, err = eks.NewNodeGroup(ctx, "node-group-0", &eks.NodeGroupArgs{

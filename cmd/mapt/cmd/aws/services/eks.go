@@ -29,6 +29,9 @@ const (
 	paramScalingMinSize        = "workers-min"
 	paramScalingMinSizeDesc    = "Worker nodes scaling minimum size"
 	defaultScalingMinSize      = "1"
+  paramAddons			 					 = "addons"
+	paramAddonsDesc            = "List of EKS addons to be installed, separated by commas."
+	defaultAddons              = ""
 	// paramOnlySystemPool       = "only-system-pool"
 	// paramOnlySystemPoolDesc   = "if we do not need bunch of resources we can run only the systempool. More info https://learn.microsoft.com/es-es/azure/aks/use-system-pools?tabs=azure-cli#system-and-user-node-pools"
 	// paramEnableAppRouting     = "enable-app-routing"
@@ -90,6 +93,7 @@ func getCreateEKS() *cobra.Command {
 					ScalingDesiredSize: viper.GetInt(paramScalingDesiredSize),
 					ScalingMaxSize: viper.GetInt(paramScalingMaxSize),
 					ScalingMinSize: viper.GetInt(paramScalingMinSize),
+					Addons: viper.GetStringSlice(paramAddons),
 				}); err != nil {
 				logging.Error(err)
 			}
@@ -105,6 +109,7 @@ func getCreateEKS() *cobra.Command {
 	flagSet.StringP(paramScalingDesiredSize, "", defaultScalingDesiredSize, paramScalingDesiredSizeDesc)
 	flagSet.StringP(paramScalingMaxSize, "", defaultScalingMaxSize, paramScalingMaxSizeDesc)
 	flagSet.StringP(paramScalingMinSize, "", defaultScalingMinSize, paramScalingMinSizeDesc)
+	flagSet.StringSliceP(paramAddons, "", []string{}, paramAddonsDesc)
 	// flagSet.Bool(awsparams.ParamSpot, false, awsparams.ParamSpotDesc)
 	// flagSet.Bool(paramOnlySystemPool, false, paramOnlySystemPoolDesc)
 	// flagSet.Bool(paramEnableAppRouting, false, paramEnableAppRoutingDesc)
