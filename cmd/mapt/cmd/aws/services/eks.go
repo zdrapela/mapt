@@ -15,27 +15,23 @@ const (
 	cmdEKS     = "eks"
 	cmdEKSDesc = "eks operations"
 
-	paramVersion              = "version"
-	paramVersionDesc          = "EKS K8s cluster version"
-	defaultParamVMSize		    = "t3.medium"
-	paramVMSizeDesc           = "VMSize to be used on the user pool. Typically this is used to provision spot node pools"
-	defaultVersion            = "1.31"
-	paramScalingDesiredSize   = "workers-desired"
+	paramVersion                = "version"
+	paramVersionDesc            = "EKS K8s cluster version"
+	defaultParamVMSize          = "t3.medium"
+	paramVMSizeDesc             = "VMSize to be used on the user pool. Typically this is used to provision spot node pools"
+	defaultVersion              = "1.31"
+	paramScalingDesiredSize     = "workers-desired"
 	paramScalingDesiredSizeDesc = "Worker nodes scaling desired size"
-	defaultScalingDesiredSize	 = "1"
-	paramScalingMaxSize        = "workers-max"
-	paramScalingMaxSizeDesc    = "Worker nodes scaling maximum size"
-	defaultScalingMaxSize      = "3"
-	paramScalingMinSize        = "workers-min"
-	paramScalingMinSizeDesc    = "Worker nodes scaling minimum size"
-	defaultScalingMinSize      = "1"
-  paramAddons			 					 = "addons"
-	paramAddonsDesc            = "List of EKS addons to be installed, separated by commas."
-	defaultAddons              = ""
-	// paramOnlySystemPool       = "only-system-pool"
-	// paramOnlySystemPoolDesc   = "if we do not need bunch of resources we can run only the systempool. More info https://learn.microsoft.com/es-es/azure/aks/use-system-pools?tabs=azure-cli#system-and-user-node-pools"
-	// paramEnableAppRouting     = "enable-app-routing"
-	// paramEnableAppRoutingDesc = "enable application routing add-on with NGINX"
+	defaultScalingDesiredSize   = "1"
+	paramScalingMaxSize         = "workers-max"
+	paramScalingMaxSizeDesc     = "Worker nodes scaling maximum size"
+	defaultScalingMaxSize       = "3"
+	paramScalingMinSize         = "workers-min"
+	paramScalingMinSizeDesc     = "Worker nodes scaling minimum size"
+	defaultScalingMinSize       = "1"
+	paramAddons                 = "addons"
+	paramAddonsDesc             = "List of EKS addons to be installed, separated by commas."
+	defaultAddons               = ""
 )
 
 func GetEKSCmd() *cobra.Command {
@@ -62,17 +58,6 @@ func getCreateEKS() *cobra.Command {
 				return err
 			}
 
-			// // ParseEvictionRate
-			// var spotToleranceValue = spotAzure.DefaultEvictionRate
-			// if viper.IsSet(azparams.ParamSpotTolerance) {
-			// 	var ok bool
-			// 	spotToleranceValue, ok = spotAzure.ParseEvictionRate(
-			// 		viper.GetString(azparams.ParamSpotTolerance))
-			// 	if !ok {
-			// 		return fmt.Errorf("%s is not a valid spot tolerance value", viper.GetString(azparams.ParamSpotTolerance))
-			// 	}
-			// }
-
 			if err := awsEKS.Create(
 				&maptContext.ContextArgs{
 					ProjectName:   viper.GetString(params.ProjectName),
@@ -83,17 +68,14 @@ func getCreateEKS() *cobra.Command {
 					Tags:          viper.GetStringMapString(params.Tags),
 				},
 				&awsEKS.EKSRequest{
-					Prefix:              viper.GetString(params.ProjectName),
-					Location:            viper.GetString(awsparams.ParamLocation),
-					// Spot:                viper.IsSet(azparams.ParamSpot),
-					// SpotTolerance:       spotToleranceValue,
-					// SpotExcludedRegions: viper.GetStringSlice(azparams.ParamSpotExcludedRegions),
-					VMSize:              viper.GetString(awsparams.ParamVMSize),
-					KubernetesVersion:   viper.GetString(paramVersion),
+					Prefix:             viper.GetString(params.ProjectName),
+					Location:           viper.GetString(awsparams.ParamLocation),
+					VMSize:             viper.GetString(awsparams.ParamVMSize),
+					KubernetesVersion:  viper.GetString(paramVersion),
 					ScalingDesiredSize: viper.GetInt(paramScalingDesiredSize),
-					ScalingMaxSize: viper.GetInt(paramScalingMaxSize),
-					ScalingMinSize: viper.GetInt(paramScalingMinSize),
-					Addons: viper.GetStringSlice(paramAddons),
+					ScalingMaxSize:     viper.GetInt(paramScalingMaxSize),
+					ScalingMinSize:     viper.GetInt(paramScalingMinSize),
+					Addons:             viper.GetStringSlice(paramAddons),
 				}); err != nil {
 				logging.Error(err)
 			}
@@ -103,18 +85,13 @@ func getCreateEKS() *cobra.Command {
 	flagSet := pflag.NewFlagSet(params.CreateCmdName, pflag.ExitOnError)
 	flagSet.StringP(params.ConnectionDetailsOutput, "", "", params.ConnectionDetailsOutputDesc)
 	flagSet.StringToStringP(params.Tags, "", nil, params.TagsDesc)
-	flagSet.StringP(awsparams.ParamLocation, "", awsparams.DefaultLocation, awsparams.ParamLocationDesc)
+	flagSet.StringP(awsparams.ParamLocation, "", "", awsparams.ParamLocationDesc)
 	flagSet.StringP(awsparams.ParamVMSize, "", defaultParamVMSize, paramVMSizeDesc)
 	flagSet.StringP(paramVersion, "", defaultVersion, paramVersionDesc)
 	flagSet.StringP(paramScalingDesiredSize, "", defaultScalingDesiredSize, paramScalingDesiredSizeDesc)
 	flagSet.StringP(paramScalingMaxSize, "", defaultScalingMaxSize, paramScalingMaxSizeDesc)
 	flagSet.StringP(paramScalingMinSize, "", defaultScalingMinSize, paramScalingMinSizeDesc)
 	flagSet.StringSliceP(paramAddons, "", []string{}, paramAddonsDesc)
-	// flagSet.Bool(awsparams.ParamSpot, false, awsparams.ParamSpotDesc)
-	// flagSet.Bool(paramOnlySystemPool, false, paramOnlySystemPoolDesc)
-	// flagSet.Bool(paramEnableAppRouting, false, paramEnableAppRoutingDesc)
-	// flagSet.StringP(awsparams.ParamSpotTolerance, "", awsparams.DefaultSpotTolerance, awsparams.ParamSpotToleranceDesc)
-	// flagSet.StringSliceP(awsparams.ParamSpotExcludedRegions, "", []string{}, azparams.ParamSpotExcludedRegionsDesc)
 	c.PersistentFlags().AddFlagSet(flagSet)
 	return c
 }

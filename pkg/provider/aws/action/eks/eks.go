@@ -1,5 +1,3 @@
-// Just copied from AKS
-
 package eks
 
 import (
@@ -18,17 +16,14 @@ import (
 )
 
 type EKSRequest struct {
-	Prefix   string
-	Location string
-	VMSize   string
-	KubernetesVersion string
+	Prefix             string
+	Location           string
+	VMSize             string
+	KubernetesVersion  string
 	ScalingDesiredSize int
 	ScalingMaxSize     int
 	ScalingMinSize     int
-	Addons 	[]string
-	// OnlySystemPool    bool
-	// Spot              bool
-	// SpotTolerance     spotAzure.EvictionRate
+	Addons             []string
 }
 
 func Create(ctx *maptContext.ContextArgs, r *EKSRequest) (err error) {
@@ -57,7 +52,7 @@ func Destroy(ctx *maptContext.ContextArgs) error {
 		aws.DestroyStackRequest{
 			BackedURL: maptContext.BackedURL(),
 			Stackname: stackName,
-	})
+		})
 }
 
 // Main function to deploy all requried resources to AWS
