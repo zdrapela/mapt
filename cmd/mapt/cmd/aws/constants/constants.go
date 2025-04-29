@@ -26,7 +26,7 @@ const (
 	ParamLocationDesc = "location for created resources in case spot flag (if available) is not passed"
 	ParamVMSize       = "vmsize"
 	ParamVMSizeDesc   = "size for the VM"
-	DefaultVMSize     = "Standard_D8as_v5"
+	DefaultVMSize     = "t3.medium"
 )
 
 func MACArchAsCirrusArch(arch string) *cirrus.Arch {
